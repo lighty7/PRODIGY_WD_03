@@ -2,8 +2,8 @@ const cells = document.querySelectorAll('[data-cell]');
 const status = document.querySelector('.status');
 const restartButton = document.querySelector('.restart');
 
-let currentPlayer = 'X';
-let gameActive = true;
+let currentPlayer = '';
+let gameActive = false; // Game is not active until both players choose their marks
 let gameState = ['', '', '', '', '', '', '', '', ''];
 
 const winCombinations = [
@@ -12,34 +12,46 @@ const winCombinations = [
   [0, 4, 8], [2, 4, 6]
 ];
 
-cells.forEach(cell => {
-  cell.addEventListener('click', () => handleCellClick(cell));
+const chooseXButton = document.querySelector('.choose-x');
+const chooseOButton = document.querySelector('.choose-o');
+
+chooseXButton.addEventListener('click', () => chooseMark('X'));
+chooseOButton.addEventListener('click', () => chooseMark('O'));
+
+function chooseMark(mark) {
+  if (!gameActive) {
+    currentPlayer = mark;
+    gameActive = true;
+    status.textContent = `Player ${currentPlayer}'s turn`;
+  }
+}
+
+cells.forEach((cell, index) => {
+  cell.addEventListener('click', () => handleCellClick(index));
 });
 
 restartButton.addEventListener('click', restartGame);
 
-function handleCellClick(cell) {
-  const clickedCellIndex = parseInt(cell.getAttribute('data-cell'));
-  
+function handleCellClick(clickedCellIndex) {
   if (gameState[clickedCellIndex] !== '' || !gameActive) {
     return;
   }
-  
+
   gameState[clickedCellIndex] = currentPlayer;
-  cell.textContent = currentPlayer;
-  
+  cells[clickedCellIndex].textContent = currentPlayer;
+
   if (checkWin()) {
     status.textContent = `${currentPlayer} wins!`;
     gameActive = false;
     return;
   }
-  
+
   if (checkDraw()) {
     status.textContent = "It's a draw!";
     gameActive = false;
     return;
   }
-  
+
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   status.textContent = `Player ${currentPlayer}'s turn`;
 }
@@ -56,8 +68,8 @@ function checkDraw() {
 
 function restartGame() {
   gameState = ['', '', '', '', '', '', '', '', ''];
-  currentPlayer = 'X';
-  gameActive = true;
-  status.textContent = `Player ${currentPlayer}'s turn`;
+  currentPlayer = '';
+  gameActive = false;
+  status.textContent = '';
   cells.forEach(cell => cell.textContent = '');
 }
